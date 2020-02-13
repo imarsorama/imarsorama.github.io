@@ -2,7 +2,7 @@
 
 ## PROLOGUE
 
-Two households, both alike in dignity,
-In fair Verona, where we lay our scene,
-From ancient grudge break to new mutiny,
-Where civil blood makes civil hands unclean.
+Two households, both alike in dignity,<br>
+In fair Verona, where we lay our scene,<br>
+From ancient grudge break to new mutiny,<br>
+Where civil blood makes civil hands unclean.<br>
