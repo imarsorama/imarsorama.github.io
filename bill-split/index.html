@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trattoria Dosso — Bill Split</title>
+<style>
+  :root {
+    --bg: #f4f1ea;
+    --card: #ffffff;
+    --ink: #2b2b2b;
+    --muted: #8a8377;
+    --line: #e7e2d8;
+    --ivan: #2f6fb2;
+    --dima: #b25e2f;
+    --kira: #6a8f3c;
+    --split: #7a6bb2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    padding: 24px 16px 120px;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 20px; }
+  header h1 { margin: 0 0 4px; font-size: 1.6rem; letter-spacing: 0.02em; }
+  header p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+
+  .toolbar {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    margin: 16px 0 20px;
+  }
+  .toolbar button {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    padding: 7px 14px; border-radius: 999px; cursor: pointer; font-size: 0.85rem;
+    transition: box-shadow 0.15s;
+  }
+  .toolbar button:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left; font-size: 0.72rem; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--muted);
+    padding: 12px 16px; border-bottom: 1px solid var(--line);
+    background: #fbfaf7;
+  }
+  tbody td { padding: 10px 16px; border-bottom: 1px solid var(--line); font-size: 0.95rem; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  th.num { text-align: right; }
+  td.idx { color: var(--muted); width: 2.2em; font-size: 0.8rem; }
+
+  select {
+    width: 100%; max-width: 220px;
+    padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--line);
+    background: #fff; font-size: 0.9rem; cursor: pointer;
+  }
+  select.who-ivan  { border-color: var(--ivan);  color: var(--ivan); }
+  select.who-dima  { border-color: var(--dima);  color: var(--dima); }
+  select.who-kira  { border-color: var(--kira);  color: var(--kira); }
+  select.who-split { border-color: var(--split); color: var(--split); }
+
+  .totals {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,0.97); border-top: 1px solid var(--line);
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.07);
+    padding: 12px 16px;
+  }
+  .totals-inner {
+    max-width: 860px; margin: 0 auto;
+    display: flex; flex-wrap: wrap; gap: 10px 24px;
+    align-items: baseline; justify-content: center;
+  }
+  .totals .person { font-size: 1.05rem; font-weight: 600; white-space: nowrap; }
+  .totals .person small { display: block; font-weight: 400; font-size: 0.72rem; color: var(--muted); text-align: center; }
+  .totals .person.ivan { color: var(--ivan); }
+  .totals .person.dima { color: var(--dima); }
+  .totals .person.kira { color: var(--kira); }
+  .totals .grand { font-size: 1.05rem; font-weight: 700; white-space: nowrap; }
+  .totals .grand.mismatch { color: #c0392b; }
+  .note { text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Trattoria Dosso — Bill Split</h1>
+    <p>Pisogne (BS) · 22-08-2026 · 8 people · Total €235.00</p>
+    <p>Split ratio — Ivan: 4 people · Dima: 3 people · Kira: 1 person</p>
+  </header>
+
+  <div class="toolbar">
+    <button onclick="assignAll('split')">All → Split 4:3:1</button>
+    <button onclick="assignAll('ivan')">All → Ivan</button>
+    <button onclick="assignAll('dima')">All → Dima</button>
+    <button onclick="assignAll('kira')">All → Kira</button>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>Item</th>
+          <th class="num">Price</th>
+          <th>Paid by</th>
+        </tr>
+      </thead>
+      <tbody id="items"></tbody>
+    </table>
+  </div>
+
+  <p class="note">
+    "Split 4:3:1" divides the item between Ivan (4/8), Dima (3/8) and Kira (1/8).
+    Totals are rounded to whole cents so that they always add up to the bill exactly.
+    Selections are saved in your browser.
+  </p>
+</div>
+
+<div class="totals">
+  <div class="totals-inner">
+    <span class="person ivan">Ivan: <span id="total-ivan">—</span><small>pays for 4</small></span>
+    <span class="person dima">Dima: <span id="total-dima">—</span><small>pays for 3</small></span>
+    <span class="person kira">Kira: <span id="total-kira">—</span><small>pays for herself</small></span>
+    <span class="grand" id="grand">Sum: —</span>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+// Prices in euro cents to avoid floating-point drift.
+const ITEMS = [
+  ...Array.from({ length: 8 }, (_, i) => ({ name: "Coperto (cover charge) #" + (i + 1), cents: 250 })),
+  { name: "Antipasto Dosso", cents: 2600 },
+  { name: "Tartare di manzo", cents: 1500 },
+  { name: "Gazpacho", cents: 1250 },
+  { name: "Risotto alla cap.", cents: 1500 },
+  { name: "Tiramisù #1", cents: 650 },
+  { name: "Tiramisù #2", cents: 650 },
+  { name: "Cestino frutta #1", cents: 700 },
+  { name: "Cestino frutta #2", cents: 700 },
+  { name: "Casoncelli", cents: 1450 },
+  { name: "Fiorentina (1.2 kg × €55/kg)", cents: 6600 },
+  { name: "Patate al rosmarino", cents: 550 },
+  { name: "Birra Priula #1", cents: 700 },
+  { name: "Birra Priula #2", cents: 700 },
+  { name: "Caffè #1", cents: 150 },
+  { name: "Caffè #2", cents: 150 },
+  { name: "Acqua (1 L) #1", cents: 200 },
+  { name: "Acqua (1 L) #2", cents: 200 },
+  { name: "Acqua (1 L) #3", cents: 200 },
+  { name: "Bibita lattina #1", cents: 350 },
+  { name: "Bibita lattina #2", cents: 350 },
+  { name: "Bibita lattina #3", cents: 350 },
+];
+
+const PEOPLE = ["ivan", "dima", "kira"];
+const SPLIT_WEIGHTS = { ivan: 4, dima: 3, kira: 1 }; // out of 8
+const STORAGE_KEY = "trattoria-dosso-split-v1";
+
+function loadChoices() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (Array.isArray(saved) && saved.length === ITEMS.length) return saved;
+  } catch (e) { /* corrupted storage — fall through to default */ }
+  return ITEMS.map(() => "split");
+}
+
+let choices = loadChoices();
+
+function saveChoices() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(choices));
+}
+
+function euros(cents) {
+  return "€" + (cents / 100).toFixed(2);
+}
+
+function render() {
+  const tbody = document.getElementById("items");
+  tbody.innerHTML = "";
+  ITEMS.forEach((item, i) => {
+    const tr = document.createElement("tr");
+
+    const idx = document.createElement("td");
+    idx.className = "idx";
+    idx.textContent = i + 1;
+
+    const name = document.createElement("td");
+    name.textContent = item.name;
+
+    const price = document.createElement("td");
+    price.className = "num";
+    price.textContent = euros(item.cents);
+
+    const cell = document.createElement("td");
+    const sel = document.createElement("select");
+    sel.dataset.index = i;
+    [
+      ["split", "Split 4:3:1"],
+      ["ivan", "Ivan"],
+      ["dima", "Dima"],
+      ["kira", "Kira"],
+    ].forEach(([value, label]) => {
+      const opt = document.createElement("option");
+      opt.value = value;
+      opt.textContent = label;
+      sel.appendChild(opt);
+    });
+    sel.value = choices[i];
+    sel.className = "who-" + choices[i];
+    sel.addEventListener("change", () => {
+      choices[i] = sel.value;
+      sel.className = "who-" + sel.value;
+      saveChoices();
+      updateTotals();
+    });
+    cell.appendChild(sel);
+
+    tr.append(idx, name, price, cell);
+    tbody.appendChild(tr);
+  });
+  updateTotals();
+}
+
+function updateTotals() {
+  // Exact shares in 1/8 of a cent (integer arithmetic, no rounding yet).
+  const eighths = { ivan: 0, dima: 0, kira: 0 };
+  let grandCents = 0;
+  ITEMS.forEach((item, i) => {
+    grandCents += item.cents;
+    const who = choices[i];
+    if (who === "split") {
+      PEOPLE.forEach(p => { eighths[p] += item.cents * SPLIT_WEIGHTS[p]; });
+    } else {
+      eighths[who] += item.cents * 8;
+    }
+  });
+
+  // Round each share down to whole cents, then hand out the leftover cents
+  // to the largest remainders so the three totals sum to the bill exactly.
+  const floors = {}, remainders = [];
+  let assigned = 0;
+  PEOPLE.forEach(p => {
+    floors[p] = Math.floor(eighths[p] / 8);
+    assigned += floors[p];
+    remainders.push({ p, rem: eighths[p] % 8 });
+  });
+  remainders.sort((a, b) => b.rem - a.rem);
+  for (let k = 0; k < grandCents - assigned; k++) floors[remainders[k].p] += 1;
+
+  PEOPLE.forEach(p => {
+    document.getElementById("total-" + p).textContent = euros(floors[p]);
+  });
+  const sum = PEOPLE.reduce((acc, p) => acc + floors[p], 0);
+  const grandEl = document.getElementById("grand");
+  grandEl.textContent = "Sum: " + euros(sum) + " / " + euros(grandCents);
+  grandEl.classList.toggle("mismatch", sum !== grandCents);
+}
+
+function assignAll(who) {
+  choices = ITEMS.map(() => who);
+  saveChoices();
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
