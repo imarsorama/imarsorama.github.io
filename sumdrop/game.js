@@ -292,7 +292,37 @@
     draw();
   }
 
-  function startGame() {
+  function seedDemoBoard() {
+    // Bottom row almost ready: values sum to 20; erase the 5 → target 15 clears.
+    const bottom = ROWS - 1;
+    const vals = [2, 3, 1, 4, 5, 1, 2, 2]; // total 20; without 5 → 15
+    for (let c = 0; c < COLS; c++) {
+      state.board[bottom][c] = { v: vals[c], erased: false };
+    }
+    state.rowTargets[bottom] = 15;
+    // Partial stack above for atmosphere
+    const pattern = [
+      [null, 3, null, null, 2, null, null, 1],
+      [4, null, null, 6, null, null, 2, null],
+    ];
+    for (let i = 0; i < pattern.length; i++) {
+      const r = bottom - 1 - i;
+      for (let c = 0; c < COLS; c++) {
+        if (pattern[i][c] != null) state.board[r][c] = { v: pattern[i][c], erased: false };
+      }
+    }
+    for (let c = 0; c < COLS; c++) {
+      const colVals = [];
+      for (let r = HIDDEN; r < ROWS; r++) {
+        if (state.board[r][c]) colVals.push(state.board[r][c].v);
+      }
+      state.colTargets[c] = colVals.length
+        ? subsetSumTarget(colVals.length >= 2 ? colVals : [...colVals, 3, 4])
+        : 16 + ((Math.random() * 10) | 0);
+    }
+  }
+
+  function startGame(opts = {}) {
     state.board = emptyBoard();
     state.score = 0;
     state.lines = 0;
@@ -304,6 +334,10 @@
     state.mode = "play";
     syncModeButtons("play");
     generateIdleTargets();
+    const demo =
+      opts.demo ||
+      new URLSearchParams(location.search).has("demo");
+    if (demo) seedDemoBoard();
     state.next = nextPiece();
     els.overlay.classList.add("hidden");
     spawn();
@@ -826,10 +860,13 @@
     subsetSumTarget,
     getState: () => state,
     startGame,
+    seedDemoBoard,
     rowSum,
     colSum,
     rowFilled,
     colFilled,
+    setMode,
+    toggleEraseAt,
   };
 
   function init() {
