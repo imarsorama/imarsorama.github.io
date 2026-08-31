@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a1f24" />
+  <meta name="description" content="SUMDROP — Tetris gravity meets Number Sums. Stack digits, erase to match targets, clear lines." />
+  <title>SUMDROP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="bg" aria-hidden="true"></div>
+  <div class="app">
+    <header class="top">
+      <div class="brand">
+        <h1>SUMDROP</h1>
+        <p>Stack · Erase · Match</p>
+      </div>
+      <div class="stats" aria-label="Score">
+        <div class="stat"><span class="label">Score</span><strong id="score">0</strong></div>
+        <div class="stat"><span class="label">Clears</span><strong id="lines">0</strong></div>
+        <div class="stat"><span class="label">Level</span><strong id="level">1</strong></div>
+      </div>
+    </header>
+
+    <main class="main">
+      <aside class="side">
+        <div class="panel next-panel">
+          <span class="panel-label">Next</span>
+          <canvas id="next" width="120" height="72" aria-label="Next piece"></canvas>
+        </div>
+        <div class="panel erase-panel">
+          <span class="panel-label">Erases</span>
+          <strong id="erase-count">5</strong>
+          <p class="hint">Toggle erase mode, tap digits to exclude them from the sum.</p>
+        </div>
+        <div class="mode-toggle" role="group" aria-label="Input mode">
+          <button type="button" id="btn-play" class="active">Place</button>
+          <button type="button" id="btn-erase">Erase</button>
+        </div>
+        <ul class="keys">
+          <li><kbd>←→</kbd> move</li>
+          <li><kbd>↑</kbd> rotate</li>
+          <li><kbd>↓</kbd> soft</li>
+          <li><kbd>Space</kbd> drop</li>
+          <li><kbd>E</kbd> erase</li>
+          <li><kbd>P</kbd> pause</li>
+        </ul>
+      </aside>
+
+      <section id="stage" class="stage">
+        <canvas id="board" aria-label="SUMDROP board"></canvas>
+      </section>
+    </main>
+
+    <nav class="pad" aria-label="Touch controls">
+      <button type="button" id="btn-left" aria-label="Move left">◀</button>
+      <button type="button" id="btn-rotate" aria-label="Rotate">↻</button>
+      <button type="button" id="btn-down" aria-label="Soft drop">▼</button>
+      <button type="button" id="btn-right" aria-label="Move right">▶</button>
+      <button type="button" id="btn-drop" class="drop" aria-label="Hard drop">DROP</button>
+    </nav>
+  </div>
+
+  <div id="overlay" class="overlay">
+    <div class="overlay-card">
+      <p class="eyebrow">Number sums · falling blocks</p>
+      <h2 id="overlay-title">SUMDROP</h2>
+      <p id="overlay-body">Stack number blocks. Erase digits so each full row and column hits its target sum — then it clears.</p>
+      <div class="overlay-actions">
+        <button type="button" id="btn-start" class="primary">Drop in</button>
+        <button type="button" id="btn-resume" class="ghost hidden">Resume</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
