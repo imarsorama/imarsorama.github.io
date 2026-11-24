@@ -3,7 +3,6 @@
 ## Games & tools
 
 - **[SUMDROP](./sumdrop/)** — Tetris gravity + Number Sums. Stack digits, erase to hit row/column targets, clear lines.
-- **[Bill Split](./bill-split/)** — Trattoria Dosso bill splitter.
 
 ## PROLOGUE
 
